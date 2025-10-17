@@ -1,0 +1,74 @@
+package com.taskmanager.taskmanager.service;
+
+import com.taskmanager.taskmanager.dto.TaskRequestDto;
+import com.taskmanager.taskmanager.dto.TaskResponseDto;
+import com.taskmanager.taskmanager.entity.Task;
+import com.taskmanager.taskmanager.entity.User;
+import com.taskmanager.taskmanager.mapper.TaskMapper;
+import com.taskmanager.taskmanager.repository.TaskRepository;
+import com.taskmanager.taskmanager.repository.UserRepository;
+import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class TaskService {
+
+    private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
+
+    public TaskService(TaskRepository taskRepository,UserRepository userRepository){
+        this.taskRepository = taskRepository;
+        this.userRepository = userRepository;
+    }
+
+
+    public TaskResponseDto create(TaskRequestDto dto){
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("Нету такого пользователя!"));
+
+        Task task = TaskMapper.toEntity(dto,user);
+        Task taskSave = taskRepository.save(task);
+        return TaskMapper.toDto(taskSave);
+    }
+
+
+    public List<TaskResponseDto> getAll(){
+        return taskRepository.findAll()
+                .stream()
+                .map(TaskMapper::toDto)
+                .toList();
+    }
+
+    public TaskResponseDto getById(Long id){
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Нету такого пользователя!"));
+
+        return TaskMapper.toDto(task);
+    }
+
+    public TaskResponseDto update(Long id, TaskRequestDto dto){
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Нету такой задачи"));
+
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("Нету такого пользователя"));
+
+        task.setTitle(dto.getTitle());
+        task.setDescription(dto.getDescription());
+        task.setDeadline(dto.getDeadline());
+        task.setPriority(dto.getPriority());
+        task.setAssignee(user);
+
+        taskRepository.save(task);
+        return TaskMapper.toDto(task);
+    }
+
+    public void remove(Long id){
+        if(taskRepository.existsById(id)){
+            throw new RuntimeException("Нету задании под данным " + id);
+        }
+        taskRepository.deleteById(id);
+    }
+}
