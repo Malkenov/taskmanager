@@ -4,6 +4,7 @@ import com.taskmanager.taskmanager.dto.TaskRequestDto;
 import com.taskmanager.taskmanager.dto.TaskResponseDto;
 import com.taskmanager.taskmanager.entity.Task;
 import com.taskmanager.taskmanager.entity.User;
+import com.taskmanager.taskmanager.enums.EnumStatus;
 import com.taskmanager.taskmanager.mapper.TaskMapper;
 import com.taskmanager.taskmanager.repository.TaskRepository;
 import com.taskmanager.taskmanager.repository.UserRepository;
@@ -34,9 +35,16 @@ public class TaskService {
     }
 
 
-    public List<TaskResponseDto> getAll(){
-        return taskRepository.findAll()
-                .stream()
+    public List<TaskResponseDto> getAll(String status){
+        List<Task> tasks;
+        if(status != null){
+            EnumStatus enumStatus = EnumStatus.valueOf(status.toUpperCase());
+            tasks = taskRepository.findByStatus(enumStatus);
+        }else{
+            tasks = taskRepository.findAll();
+        }
+
+        return tasks.stream()
                 .map(TaskMapper::toDto)
                 .toList();
     }
