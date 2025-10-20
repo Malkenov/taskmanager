@@ -8,7 +8,6 @@ import com.taskmanager.taskmanager.enums.EnumStatus;
 import com.taskmanager.taskmanager.mapper.TaskMapper;
 import com.taskmanager.taskmanager.repository.TaskRepository;
 import com.taskmanager.taskmanager.repository.UserRepository;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,28 +18,28 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
 
-    public TaskService(TaskRepository taskRepository,UserRepository userRepository){
+    public TaskService(TaskRepository taskRepository, UserRepository userRepository) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
     }
 
 
-    public TaskResponseDto create(TaskRequestDto dto){
+    public TaskResponseDto create(TaskRequestDto dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new RuntimeException("Нету такого пользователя!"));
 
-        Task task = TaskMapper.toEntity(dto,user);
+        Task task = TaskMapper.toEntity(dto, user);
         Task taskSave = taskRepository.save(task);
         return TaskMapper.toDto(taskSave);
     }
 
 
-    public List<TaskResponseDto> getAll(String status){
+    public List<TaskResponseDto> getAll(String status) {
         List<Task> tasks;
-        if(status != null){
+        if (status != null) {
             EnumStatus enumStatus = EnumStatus.valueOf(status.toUpperCase());
             tasks = taskRepository.findByStatus(enumStatus);
-        }else{
+        } else {
             tasks = taskRepository.findAll();
         }
 
@@ -49,14 +48,14 @@ public class TaskService {
                 .toList();
     }
 
-    public TaskResponseDto getById(Long id){
+    public TaskResponseDto getById(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Нету такого пользователя!"));
 
         return TaskMapper.toDto(task);
     }
 
-    public TaskResponseDto update(Long id, TaskRequestDto dto){
+    public TaskResponseDto update(Long id, TaskRequestDto dto) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Нету такой задачи"));
 
@@ -73,10 +72,41 @@ public class TaskService {
         return TaskMapper.toDto(task);
     }
 
-    public void remove(Long id){
-        if(taskRepository.existsById(id)){
+    public TaskResponseDto updateTask(Long id, TaskRequestDto dto ){
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Нету такой задачи!"));
+
+        if(dto.getTitle() != null){
+            task.setTitle(dto.getTitle());
+        }
+
+        if(dto.getDescription() != null){
+            task.setDescription(dto.getDescription());
+        }
+
+        if(dto.getDeadline() != null){
+            task.setDeadline(dto.getDeadline());
+        }
+
+        if(dto.getPriority() != null){
+            task.setPriority(dto.getPriority());
+        }
+
+        if(dto.getUserId() != null){
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Нету такого пользователя!"));
+            task.setAssignee(user);
+        }
+
+        Task taskSave = taskRepository.save(task);
+        return TaskMapper.toDto(taskSave);
+    }
+
+    public void remove(Long id) {
+        if (!taskRepository.existsById(id)) {
             throw new RuntimeException("Нету задании под данным " + id);
         }
         taskRepository.deleteById(id);
     }
+
 }

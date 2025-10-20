@@ -1,5 +1,6 @@
 package com.taskmanager.taskmanager.entity;
 
+import com.taskmanager.taskmanager.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,6 +33,10 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole userRole = UserRole.ADMIN;
 
     @OneToMany(mappedBy = "assignee", cascade = CascadeType.ALL)
     private List<Task> taskList;

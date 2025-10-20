@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMapper {
 
-    public static User toEntity(UserRequestDto dto) {
+    public User toEntity(UserRequestDto dto) {
         User user = new User();
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());
@@ -18,10 +18,10 @@ public class UserMapper {
         return user;
     }
 
-    public static UserResponseDto toDto(User user) {
+    public UserResponseDto toDto(User user) {
         UserResponseDto userResponseDto = new UserResponseDto();
         userResponseDto.setEmail(user.getEmail());
-        userResponseDto.setFirstName(userResponseDto.getFirstName());
+        userResponseDto.setFirstName(user.getFirstName());
         userResponseDto.setLastName(user.getLastName());
 
         if (user.getTaskList() != null) {

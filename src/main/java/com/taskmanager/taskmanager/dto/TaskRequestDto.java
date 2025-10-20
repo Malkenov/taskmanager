@@ -29,6 +29,7 @@ public class TaskRequestDto {
     @NotNull(message = "Укажите точную продолжительность - LOW,MEDIUM или HIGH")
     private EnumPriority priority;
 
+
     @NotNull(message = "Id пользователя обязательно")
     private Long userId;
 }
