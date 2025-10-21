@@ -4,6 +4,7 @@ import com.taskmanager.taskmanager.dto.UserRequestDto;
 import com.taskmanager.taskmanager.dto.UserResponseDto;
 import com.taskmanager.taskmanager.entity.User;
 import com.taskmanager.taskmanager.enums.UserRole;
+import com.taskmanager.taskmanager.exception.IncorrectDataException;
 import com.taskmanager.taskmanager.mapper.UserMapper;
 import com.taskmanager.taskmanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ public class UserService {
     }
 
     public UserResponseDto getById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Нету такого пользователя!"));
+        User user = userRepository.findById(id).orElseThrow(() -> new IncorrectDataException("Нету такого пользователя!"));
         return userMapper.toDto(user);
     }
 
@@ -36,7 +37,7 @@ public class UserService {
     }
 
     public UserResponseDto updateUser(Long id, UserRequestDto user) {
-        User userId = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Нету такого пользователя!"));
+        User userId = userRepository.findById(id).orElseThrow(() -> new IncorrectDataException("Нету такого пользователя!"));
 
         userId.setEmail(user.getEmail());
         userId.setFirstName(user.getFirstName());
@@ -47,15 +48,15 @@ public class UserService {
     // -- Получение роли админа --
     public void userNewRole(Long id, UserRole role){
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Нету такого пользователя!"));
+                .orElseThrow(() -> new IncorrectDataException("Нету такого пользователя!"));
         user.setUserRole(role);
         userRepository.save(user);
     }
 
 
     public void removeUser(Long id) {
-        if (userRepository.existsById(id)) {
-            throw new RuntimeException("Нету такого пользователя!");
+        if (!userRepository.existsById(id)) {
+            throw new IncorrectDataException("Нету такого пользователя!");
         }
         userRepository.deleteById(id);
     }
