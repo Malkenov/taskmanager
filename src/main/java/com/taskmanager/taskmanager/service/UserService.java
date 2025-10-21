@@ -9,6 +9,7 @@ import com.taskmanager.taskmanager.mapper.UserMapper;
 import com.taskmanager.taskmanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
@@ -21,6 +22,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+    @Transactional
     public UserResponseDto createUser(UserRequestDto dto) {
         User user = userMapper.toEntity(dto);
         User userSave = userRepository.save(user);
@@ -36,6 +38,7 @@ public class UserService {
         return userRepository.findAll().stream().map(userMapper::toDto).toList();
     }
 
+    @Transactional
     public UserResponseDto updateUser(Long id, UserRequestDto user) {
         User userId = userRepository.findById(id).orElseThrow(() -> new IncorrectDataException("Нету такого пользователя!"));
 
@@ -45,6 +48,8 @@ public class UserService {
         userId.setPassword(user.getPassword());
         return userMapper.toDto(userId);
     }
+
+    @Transactional
     // -- Получение роли админа --
     public void userNewRole(Long id, UserRole role){
         User user = userRepository.findById(id)
@@ -54,6 +59,7 @@ public class UserService {
     }
 
 
+    @Transactional
     public void removeUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new IncorrectDataException("Нету такого пользователя!");

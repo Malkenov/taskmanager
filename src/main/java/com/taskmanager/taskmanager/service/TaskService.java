@@ -5,10 +5,12 @@ import com.taskmanager.taskmanager.dto.TaskResponseDto;
 import com.taskmanager.taskmanager.entity.Task;
 import com.taskmanager.taskmanager.entity.User;
 import com.taskmanager.taskmanager.enums.EnumStatus;
+import com.taskmanager.taskmanager.exception.IncorrectDataException;
 import com.taskmanager.taskmanager.mapper.TaskMapper;
 import com.taskmanager.taskmanager.repository.TaskRepository;
 import com.taskmanager.taskmanager.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,6 +26,7 @@ public class TaskService {
     }
 
 
+    @Transactional
     public TaskResponseDto create(TaskRequestDto dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new RuntimeException("Нету такого пользователя!"));
@@ -55,6 +58,7 @@ public class TaskService {
         return TaskMapper.toDto(task);
     }
 
+    @Transactional
     public TaskResponseDto update(Long id, TaskRequestDto dto) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Нету такой задачи"));
@@ -72,6 +76,7 @@ public class TaskService {
         return TaskMapper.toDto(task);
     }
 
+    @Transactional
     public TaskResponseDto updateTask(Long id, TaskRequestDto dto ){
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Нету такой задачи!"));
@@ -94,14 +99,16 @@ public class TaskService {
 
         if(dto.getUserId() != null){
             User user = userRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Нету такого пользователя!"));
+                    .orElseThrow(() -> new IncorrectDataException("Нету такого пользователя!"));
             task.setAssignee(user);
         }
+
 
         Task taskSave = taskRepository.save(task);
         return TaskMapper.toDto(taskSave);
     }
 
+    @Transactional
     public void remove(Long id) {
         if (!taskRepository.existsById(id)) {
             throw new RuntimeException("Нету задании под данным " + id);
