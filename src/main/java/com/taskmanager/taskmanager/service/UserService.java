@@ -30,7 +30,7 @@ public class UserService {
     }
 
     public UserResponseDto getById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new IncorrectDataException("Нету такого пользователя!"));
+        User user = userRepository.findById(id).orElseThrow(() -> new IncorrectDataException("Пользователь с id" + id + "не найден!"));
         return userMapper.toDto(user);
     }
 
@@ -40,7 +40,7 @@ public class UserService {
 
     @Transactional
     public UserResponseDto updateUser(Long id, UserRequestDto user) {
-        User userId = userRepository.findById(id).orElseThrow(() -> new IncorrectDataException("Нету такого пользователя!"));
+        User userId = userRepository.findById(id).orElseThrow(() -> new IncorrectDataException("Пользователь с id" + id + "не найден!"));
 
         userId.setEmail(user.getEmail());
         userId.setFirstName(user.getFirstName());
@@ -53,7 +53,7 @@ public class UserService {
     // -- Получение роли админа --
     public void userNewRole(Long id, UserRole role){
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new IncorrectDataException("Нету такого пользователя!"));
+                .orElseThrow(() -> new IncorrectDataException("Пользователь с id" + id + "не найден!"));
         user.setUserRole(role);
         userRepository.save(user);
     }
@@ -62,7 +62,7 @@ public class UserService {
     @Transactional
     public void removeUser(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new IncorrectDataException("Нету такого пользователя!");
+            throw new IncorrectDataException("Пользователь с id" + id + "не найден!");
         }
         userRepository.deleteById(id);
     }

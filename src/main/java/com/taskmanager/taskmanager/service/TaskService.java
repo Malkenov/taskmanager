@@ -29,7 +29,7 @@ public class TaskService {
     @Transactional
     public TaskResponseDto create(TaskRequestDto dto) {
         User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("Нету такого пользователя!"));
+                .orElseThrow(() -> new IncorrectDataException("Указанный вами пользователь не найден!"));
 
         Task task = TaskMapper.toEntity(dto, user);
         Task taskSave = taskRepository.save(task);
@@ -53,7 +53,7 @@ public class TaskService {
 
     public TaskResponseDto getById(Long id) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Нету такого пользователя!"));
+                .orElseThrow(() -> new IncorrectDataException("По вашему запросу, задачи под номером " + id + "не существует!"));
 
         return TaskMapper.toDto(task);
     }
@@ -61,10 +61,10 @@ public class TaskService {
     @Transactional
     public TaskResponseDto update(Long id, TaskRequestDto dto) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Нету такой задачи"));
+                .orElseThrow(() -> new RuntimeException("По вашему запросу, задачи под номером " + id + "не существует!"));
 
         User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("Нету такого пользователя"));
+                .orElseThrow(() -> new RuntimeException("Указанный вами пользователь не найден!"));
 
         task.setTitle(dto.getTitle());
         task.setDescription(dto.getDescription());
@@ -79,7 +79,7 @@ public class TaskService {
     @Transactional
     public TaskResponseDto updateTask(Long id, TaskRequestDto dto ){
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Нету такой задачи!"));
+                .orElseThrow(() -> new RuntimeException("По вашему запросу, задачи под номером " + id + "не существует!"));
 
         if(dto.getTitle() != null){
             task.setTitle(dto.getTitle());
@@ -99,7 +99,7 @@ public class TaskService {
 
         if(dto.getUserId() != null){
             User user = userRepository.findById(id)
-                    .orElseThrow(() -> new IncorrectDataException("Нету такого пользователя!"));
+                    .orElseThrow(() -> new IncorrectDataException("Указанный вами пользователь не найден!"));
             task.setAssignee(user);
         }
 
@@ -111,7 +111,7 @@ public class TaskService {
     @Transactional
     public void remove(Long id) {
         if (!taskRepository.existsById(id)) {
-            throw new RuntimeException("Нету задании под данным " + id);
+            throw new RuntimeException("По вашему запросу, задачи под номером " + id + "не существует!");
         }
         taskRepository.deleteById(id);
     }
