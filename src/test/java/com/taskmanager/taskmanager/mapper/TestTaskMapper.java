@@ -1,9 +1,11 @@
 package com.taskmanager.taskmanager.mapper;
 
 import com.taskmanager.taskmanager.dto.TaskRequestDto;
+import com.taskmanager.taskmanager.dto.TaskResponseDto;
 import com.taskmanager.taskmanager.entity.Task;
 import com.taskmanager.taskmanager.entity.User;
 import com.taskmanager.taskmanager.enums.EnumPriority;
+import com.taskmanager.taskmanager.enums.EnumStatus;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -30,5 +32,23 @@ public class TestTaskMapper {
         assertEquals(LocalDate.of(2025,10,22),task.getDeadline());
         assertEquals(EnumPriority.LOW,task.getPriority());
         assertEquals(user,task.getAssignee());
+    }
+
+
+    @Test
+    void testToDto(){
+        User user = new User();
+        user.setId(10L);
+
+        Task task = new Task();
+        task.setTitle("Заголовок");
+        task.setDescription("Описание задании");
+        task.setDeadline(LocalDate.of(2025,10,22));
+        task.setStatus(EnumStatus.PROCESS);
+        task.setPriority(EnumPriority.LOW);
+
+
+        TaskResponseDto dto = TaskMapper.toDto(task);
+
     }
 }
