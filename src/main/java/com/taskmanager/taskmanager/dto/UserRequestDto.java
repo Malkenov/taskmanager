@@ -1,10 +1,7 @@
 package com.taskmanager.taskmanager.dto;
 
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class UserRequestDto {
 
-    @NotBlank(message = "Введите e-mail!")
+    @Email(message = "Введите e-mail!")
     private String email;
 
     @NotBlank(message = "Имя обязательно!")
