@@ -50,5 +50,12 @@ public class TestTaskMapper {
 
         TaskResponseDto dto = TaskMapper.toDto(task);
 
+        assertEquals("Заголовок",dto.getTitle());
+        assertEquals("Описание задании",dto.getDescription());
+        assertEquals(LocalDate.of(2025,10,22),dto.getDeadline());
+        assertEquals(EnumStatus.PROCESS,dto.getStatus());
+        assertEquals(EnumPriority.LOW,dto.getPriority());
+        assertEquals(10L,dto.getUserId());
+
     }
 }
