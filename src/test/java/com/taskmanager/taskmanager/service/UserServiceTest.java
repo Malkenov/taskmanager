@@ -1,6 +1,7 @@
 package com.taskmanager.taskmanager.service;
 
 import com.taskmanager.taskmanager.dto.UserRequestDto;
+import com.taskmanager.taskmanager.dto.UserResponseDto;
 import com.taskmanager.taskmanager.entity.User;
 import com.taskmanager.taskmanager.mapper.UserMapper;
 import com.taskmanager.taskmanager.repository.UserRepository;
@@ -10,7 +11,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import static org.mockito.Mockito.*;
 import static org.hamcrest.Matchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 public class UserServiceTest {
@@ -41,5 +44,12 @@ public class UserServiceTest {
     @Test
     void createUser(){
         when(userRepository.save(Mockito.<User>any())).thenReturn(user);
-    }
-}
+
+
+    UserResponseDto result = userService.createUser(dto);
+
+    assertEquals("user@mail.ru",result.getEmail());
+    assertEquals("user",result.getFirstName());
+    assertEquals("user",result.getLastName());
+    verify(userRepository).save(Mockito.<User>any());
+}}
