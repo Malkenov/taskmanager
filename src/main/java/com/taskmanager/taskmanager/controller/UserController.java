@@ -2,17 +2,14 @@ package com.taskmanager.taskmanager.controller;
 
 import com.taskmanager.taskmanager.dto.UserRequestDto;
 import com.taskmanager.taskmanager.dto.UserResponseDto;
-import com.taskmanager.taskmanager.entity.User;
-import com.taskmanager.taskmanager.enums.UserRole;
 import com.taskmanager.taskmanager.service.UserService;
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
-import lombok.NoArgsConstructor;
-import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -22,42 +19,28 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<UserResponseDto> createUser(@RequestBody @Valid UserRequestDto dto){
-        UserResponseDto userResponseDto = userService.createUser(dto);
-        return ResponseEntity.ok(userResponseDto);
+    public ResponseEntity<UserResponseDto> create(@Valid @RequestBody UserRequestDto dto) {
+        UserResponseDto created = userService.create(dto);
+        return ResponseEntity.created(URI.create("/users/" )).body(created);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponseDto>> getAll(){
-        List<UserResponseDto> userResponseDto = userService.getAll();
-        return ResponseEntity.ok(userResponseDto);
+    public ResponseEntity<List<UserResponseDto>> getAll() {
+        return ResponseEntity.ok(userService.getAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDto> getById(@PathVariable Long id){
-        UserResponseDto userResponseDto = userService.getById(id);
-        return ResponseEntity.ok(userResponseDto);
+    public ResponseEntity<UserResponseDto> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long id,
-                                                      @RequestBody UserRequestDto dto){
-        UserResponseDto userResponseDto = userService.updateUser(id, dto);
-        return ResponseEntity.ok(userResponseDto);
+    public ResponseEntity<UserResponseDto> update(@PathVariable Long id, @Valid @RequestBody UserRequestDto dto) {
+        return ResponseEntity.ok(userService.update(id, dto));
     }
-
-
-    // -- Получение админа --
-    @PatchMapping("/{id}/role")
-    public ResponseEntity<Void> registerAdmin(@PathVariable Long id,
-                                              @RequestParam UserRole role){
-        userService.userNewRole(id,role);
-        return ResponseEntity.noContent().build();
-    }
-
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removeUser(@PathVariable Long id){
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         userService.removeUser(id);
         return ResponseEntity.noContent().build();
     }

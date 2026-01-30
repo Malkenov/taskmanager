@@ -1,12 +1,18 @@
 package com.taskmanager.taskmanager.entity;
 
 import com.taskmanager.taskmanager.enums.UserRole;
+import com.taskmanager.taskmanager.entity.Task;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -15,8 +21,8 @@ import java.util.Objects;
 @Setter
 @AllArgsConstructor
 @Entity
-@Table(name = "пользователи")
-public class User {
+@Table(name = "users")
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,33 +31,51 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
     private String firstName;
-
-    @Column(nullable = false)
     private String lastName;
 
+    // password must be stored hashed
     @Column(nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserRole userRole = UserRole.ADMIN;
+    private UserRole userRole;
 
-    @OneToMany(mappedBy = "assignee", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "assignee", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Task> taskList;
-
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(email, user.email) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(password, user.password) && Objects.equals(taskList, user.taskList);
+        return Objects.equals(id, user.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, email, firstName, lastName, password, taskList);
+        return Objects.hash(id);
     }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+    @Override
+    public String getUsername() {return email;}
+
+    @Override
+    public boolean isAccountNonExpired() {return true;}
+
+    @Override
+    public boolean isAccountNonLocked() {return true;}
+
+    @Override
+    public boolean isCredentialsNonExpired() {return true;}
+
+    @Override
+    public boolean isEnabled() {return true;}
 }

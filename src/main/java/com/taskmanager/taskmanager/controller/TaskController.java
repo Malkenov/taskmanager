@@ -4,60 +4,39 @@ import com.taskmanager.taskmanager.dto.TaskRequestDto;
 import com.taskmanager.taskmanager.dto.TaskResponseDto;
 import com.taskmanager.taskmanager.service.TaskService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
 @RequestMapping("/tasks")
+@RequiredArgsConstructor
 public class TaskController {
 
     private final TaskService taskService;
 
-
-    public TaskController(TaskService taskService) {
-        this.taskService = taskService;
-    }
-
     @PostMapping
-    public ResponseEntity<TaskResponseDto> createTask(@RequestBody @Valid TaskRequestDto dto) {
-        TaskResponseDto taskResponseDto = taskService.create(dto);
-        return ResponseEntity.ok(taskResponseDto);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<TaskResponseDto> getByIdTasks(@PathVariable Long id) {
-        TaskResponseDto taskResponseDto = taskService.getById(id);
-        return ResponseEntity.ok(taskResponseDto);
+    public ResponseEntity<TaskResponseDto> create(@Valid @RequestBody TaskRequestDto dto) {
+        TaskResponseDto created = taskService.create(dto);
+        return ResponseEntity.created(URI.create("/tasks/" + (created.getId() != null ? created.getId() : ""))).body(created);
     }
 
     @GetMapping
-    public ResponseEntity<List<TaskResponseDto>> getAllTasks(
-            @RequestParam(required = false) String status) {
-        List<TaskResponseDto> taskResponseDto = taskService.getAll(status);
-        return ResponseEntity.ok(taskResponseDto);
+    public ResponseEntity<List<TaskResponseDto>> getAll() {
+        return ResponseEntity.ok(taskService.getAll());
     }
 
-
-    @PutMapping("/{id}")
-    public ResponseEntity<TaskResponseDto> updateTask(@PathVariable Long id,
-                                                      @RequestBody TaskRequestDto dto) {
-        TaskResponseDto taskResponseDto = taskService.update(id, dto);
-        return ResponseEntity.ok(taskResponseDto);
-    }
-
-    @PatchMapping("/{id}")
-    public ResponseEntity<TaskResponseDto> patchTask(@PathVariable Long id,
-                                                     @RequestBody TaskRequestDto dto) {
-        TaskResponseDto taskResponseDto = taskService.updateTask(id, dto);
-        return ResponseEntity.ok(taskResponseDto);
+    @PutMapping("/{id}/status")
+    public ResponseEntity<TaskResponseDto> updateStatus(@PathVariable Long id, @RequestParam String status) {
+        return ResponseEntity.ok(taskService.updateStatus(id, status));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removeTask(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         taskService.remove(id);
         return ResponseEntity.noContent().build();
     }
-
 }

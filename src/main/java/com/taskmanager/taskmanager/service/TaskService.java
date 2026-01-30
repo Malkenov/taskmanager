@@ -5,115 +5,62 @@ import com.taskmanager.taskmanager.dto.TaskResponseDto;
 import com.taskmanager.taskmanager.entity.Task;
 import com.taskmanager.taskmanager.entity.User;
 import com.taskmanager.taskmanager.enums.EnumStatus;
-import com.taskmanager.taskmanager.exception.IncorrectDataException;
+import com.taskmanager.taskmanager.exception.NotFoundException;
 import com.taskmanager.taskmanager.mapper.TaskMapper;
 import com.taskmanager.taskmanager.repository.TaskRepository;
 import com.taskmanager.taskmanager.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class TaskService {
 
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+    private final TaskMapper taskMapper;
 
-    public TaskService(TaskRepository taskRepository, UserRepository userRepository) {
-        this.taskRepository = taskRepository;
-        this.userRepository = userRepository;
+    public List<TaskResponseDto> getAll() {
+        return taskRepository.findAll()
+                .stream()
+                .map(taskMapper::toDto)
+                .collect(Collectors.toList());
     }
-
 
     @Transactional
     public TaskResponseDto create(TaskRequestDto dto) {
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new IncorrectDataException("Указанный вами пользователь не найден!"));
-
-        Task task = TaskMapper.toEntity(dto, user);
-        Task taskSave = taskRepository.save(task);
-        return TaskMapper.toDto(taskSave);
-    }
-
-
-    public List<TaskResponseDto> getAll(String status) {
-        List<Task> tasks;
-        if (status != null) {
-            EnumStatus enumStatus = EnumStatus.valueOf(status.toUpperCase());
-            tasks = taskRepository.findByStatus(enumStatus);
-        } else {
-            tasks = taskRepository.findAll();
+        User assignee = null;
+        if (dto.getUserId() != null) {
+            assignee = userRepository.findById(dto.getUserId())
+                    .orElseThrow(() -> new NotFoundException("Assignee not found: " + dto.getUserId()));
         }
-
-        return tasks.stream()
-                .map(TaskMapper::toDto)
-                .toList();
-    }
-
-    public TaskResponseDto getById(Long id) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new IncorrectDataException("По вашему запросу, задачи под номером " + id + "не существует!"));
-
-        return TaskMapper.toDto(task);
-    }
-
-    @Transactional
-    public TaskResponseDto update(Long id, TaskRequestDto dto) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("По вашему запросу, задачи под номером " + id + "не существует!"));
-
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("Указанный вами пользователь не найден!"));
-
-        task.setTitle(dto.getTitle());
-        task.setDescription(dto.getDescription());
-        task.setDeadline(dto.getDeadline());
-        task.setPriority(dto.getPriority());
-        task.setAssignee(user);
-
-        taskRepository.save(task);
-        return TaskMapper.toDto(task);
-    }
-
-    @Transactional
-    public TaskResponseDto updateTask(Long id, TaskRequestDto dto ){
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("По вашему запросу, задачи под номером " + id + "не существует!"));
-
-        if(dto.getTitle() != null){
-            task.setTitle(dto.getTitle());
-        }
-
-        if(dto.getDescription() != null){
-            task.setDescription(dto.getDescription());
-        }
-
-        if(dto.getDeadline() != null){
-            task.setDeadline(dto.getDeadline());
-        }
-
-        if(dto.getPriority() != null){
-            task.setPriority(dto.getPriority());
-        }
-
-        if(dto.getUserId() != null){
-            User user = userRepository.findById(id)
-                    .orElseThrow(() -> new IncorrectDataException("Указанный вами пользователь не найден!"));
-            task.setAssignee(user);
-        }
-
-
-        Task taskSave = taskRepository.save(task);
-        return TaskMapper.toDto(taskSave);
+        Task task = TaskMapper.toEntity(dto, assignee);
+        Task saved = taskRepository.save(task);
+        return TaskMapper.toDto(saved);
     }
 
     @Transactional
     public void remove(Long id) {
         if (!taskRepository.existsById(id)) {
-            throw new RuntimeException("По вашему запросу, задачи под номером " + id + "не существует!");
+            throw new NotFoundException("Task with id " + id + " not found!");
         }
         taskRepository.deleteById(id);
     }
 
+    @Transactional
+    public TaskResponseDto updateStatus(Long id, String status) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new NotFoundException("Task not found: " + id));
+        try {
+            EnumStatus newStatus = EnumStatus.valueOf(status);
+            task.setStatus(newStatus);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("Invalid status: " + status);
+        }
+        Task saved = taskRepository.save(task);
+        return TaskMapper.toDto(saved);
+    }
 }

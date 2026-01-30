@@ -20,6 +20,7 @@ public class TaskMapper {
 
     public static TaskResponseDto toDto(Task task){
         TaskResponseDto taskResponseDto = new TaskResponseDto();
+        taskResponseDto.setId(task.getId());
         taskResponseDto.setTitle(task.getTitle());
         taskResponseDto.setDescription(task.getDescription());
         taskResponseDto.setDeadline(task.getDeadline());
