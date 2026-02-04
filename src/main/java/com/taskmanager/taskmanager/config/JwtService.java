@@ -55,4 +55,14 @@ public class JwtService {
               .signWith(getSignInKey(), SignatureAlgorithm.HS256)
               .compact();
   }
+
+  public String generatorAccessToken(Map<String, Objects> claims, UserDetails userDetails){
+      Long expirationAccessToken = jwtSecurityConfigProperties.getAccessToken().getExpiration();
+      return buildToken(claims,userDetails,expirationAccessToken);
+  }
+
+  public String generatorRefreshToken(Map<String, Objects> claims, UserDetails userDetails){
+      Long expirationRefreshToken = jwtSecurityConfigProperties.getRefreshToken().getExpiration();
+      return buildToken(claims,userDetails,expirationRefreshToken);
+  }
 }
