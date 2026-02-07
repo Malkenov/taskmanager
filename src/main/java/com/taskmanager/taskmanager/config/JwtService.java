@@ -42,7 +42,7 @@ public class JwtService {
       return claimsTFunction.apply(claims);
   }
 
-  public String getUsername(String token){
+  public String extractUsername(String token){
       return extractClaims(token, Claims::getSubject);
   }
 
@@ -64,5 +64,21 @@ public class JwtService {
   public String generatorRefreshToken(Map<String, Objects> claims, UserDetails userDetails){
       Long expirationRefreshToken = jwtSecurityConfigProperties.getRefreshToken().getExpiration();
       return buildToken(claims,userDetails,expirationRefreshToken);
+  }
+
+
+  public Date extractExpiration(String token){
+      return extractClaims(token, Claims::getExpiration);
+  }
+
+
+  private boolean isTokenExpired(String token){
+      return extractExpiration(token).before(new Date());
+  }
+
+
+  public boolean isTokenValid(String token, UserDetails userDetails){
+    final String username = extractUsername(token);
+    return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
   }
 }
